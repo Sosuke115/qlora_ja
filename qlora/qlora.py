@@ -573,7 +573,8 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
     """
     def load_data(dataset_name):
         if dataset_name == 'alpaca':
-            return load_dataset("tatsu-lab/alpaca")
+            # return load_dataset("tatsu-lab/alpaca")
+            return load_dataset("kunishou/databricks-dolly-15k-ja")
         elif dataset_name == 'alpaca-clean':
             return load_dataset("yahma/alpaca-cleaned")
         elif dataset_name == 'chip2':
@@ -656,6 +657,7 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
             train_dataset = train_dataset.select(range(args.max_train_samples))
         if args.group_by_length:
             train_dataset = train_dataset.map(lambda x: {'length': len(x['input']) + len(x['output'])})
+        print("dataset:", dataset["train"][0])
 
     data_collator = DataCollatorForCausalLM(
         tokenizer=tokenizer,
@@ -704,6 +706,8 @@ def train():
     model, tokenizer = get_accelerate_model(args, checkpoint_dir)
 
     model.config.use_cache = False
+    model.config.pretraining_tp = 1  # 7b 事前学習で使用したテンソル並列ランク
+    # model.config.pretraining_tp = 2  # 13b
     print('loaded model')
     set_seed(args.seed)
 
