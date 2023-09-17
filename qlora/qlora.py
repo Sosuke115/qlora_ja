@@ -573,8 +573,11 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
     """
     def load_data(dataset_name):
         if dataset_name == 'alpaca':
-            # return load_dataset("tatsu-lab/alpaca")
+            return load_dataset("tatsu-lab/alpaca")
+        elif dataset_name == 'databricks-dolly-15k-ja':
             return load_dataset("kunishou/databricks-dolly-15k-ja")
+        elif dataset_name == 'hh-rlhf-49k-ja':
+            return load_dataset("kunishou/hh-rlhf-49k-ja")
         elif dataset_name == 'alpaca-clean':
             return load_dataset("yahma/alpaca-cleaned")
         elif dataset_name == 'chip2':
@@ -706,8 +709,12 @@ def train():
     model, tokenizer = get_accelerate_model(args, checkpoint_dir)
 
     model.config.use_cache = False
-    model.config.pretraining_tp = 1  # 7b 事前学習で使用したテンソル並列ランク
-    # model.config.pretraining_tp = 2  # 13b
+    if "7b" in model_args.model_name_or_path:
+        model.config.pretraining_tp = 1  # 7b 事前学習で使用したテンソル並列ランク
+        print("1 is set in pretraining_tp")
+    elif "13b" in model_args.model_name_or_path:
+        model.config.pretraining_tp = 2 # 13b
+        print("2 is set in pretraining_tp")
     print('loaded model')
     set_seed(args.seed)
 
