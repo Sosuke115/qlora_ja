@@ -83,6 +83,9 @@ class ModelArguments:
     tokenizer_name: Optional[str] = field(
         default=None, metadata={"help": "Pretrained tokenizer name or path if not the same as model_name"}
     )
+    variant: Optional[str] = field(
+        default=None
+    )
     trust_remote_code: Optional[bool] = field(
         default=False,
         metadata={"help": "Enable unpickling of arbitrary code in AutoModelForCausalLM#from_pretrained."}
