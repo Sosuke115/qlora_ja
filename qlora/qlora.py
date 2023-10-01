@@ -316,6 +316,7 @@ def get_accelerate_model(args, checkpoint_dir):
         cache_dir=args.cache_dir,
         load_in_4bit=args.bits == 4,
         load_in_8bit=args.bits == 8,
+        variant=args.variant,
         device_map=device_map,
         max_memory=max_memory,
         quantization_config=BitsAndBytesConfig(
