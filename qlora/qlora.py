@@ -367,7 +367,7 @@ def get_accelerate_model(args, checkpoint_dir):
             model=model,
         )
     # if 'llama' in args.model_name_or_path or isinstance(tokenizer, LlamaTokenizer):
-    if 'llama' in args.model_name_or_path or isinstance(tokenizer, LlamaTokenizer) and args.model_name_or_path != "args.modenovelai/nerdstash-tokenizer-v1":
+    if ('llama' in args.model_name_or_path or isinstance(tokenizer, LlamaTokenizer)) and args.tokenizer_name != "novelai/nerdstash-tokenizer-v1":
         # LLaMA tokenizer may not have correct special tokens set.
         # Check and add them if missing to prevent them from being parsed into different tokens.
         # Note that these are present in the vocabulary.
