@@ -83,6 +83,9 @@ class ModelArguments:
     tokenizer_name: Optional[str] = field(
         default=None, metadata={"help": "Pretrained tokenizer name or path if not the same as model_name"}
     )
+    use_fast_tokenizer: Optional[bool] = field(
+        default=False,
+    )
     variant: Optional[str] = field(
         default=None
     )
@@ -355,7 +358,7 @@ def get_accelerate_model(args, checkpoint_dir):
         args.tokenizer_name if args.tokenizer_name else args.model_name_or_path,
         cache_dir=args.cache_dir,
         padding_side="right",
-        use_fast=False, # Fast tokenizer giving issues.
+        use_fast=args.use_fast_tokenizer, # Fast tokenizer giving issues.
         tokenizer_type='llama' if 'llama' in args.model_name_or_path else None, # Needed for HF name change
         trust_remote_code=args.trust_remote_code,
         use_auth_token=args.use_auth_token,
