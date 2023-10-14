@@ -366,8 +366,7 @@ def get_accelerate_model(args, checkpoint_dir):
             tokenizer=tokenizer,
             model=model,
         )
-    # if 'llama' in args.model_name_or_path or isinstance(tokenizer, LlamaTokenizer):
-    if ('llama' in args.model_name_or_path or isinstance(tokenizer, LlamaTokenizer)) and args.tokenizer_name != "novelai/nerdstash-tokenizer-v1":
+    if 'llama' in args.model_name_or_path or isinstance(tokenizer, LlamaTokenizer):
         # LLaMA tokenizer may not have correct special tokens set.
         # Check and add them if missing to prevent them from being parsed into different tokens.
         # Note that these are present in the vocabulary.
@@ -376,10 +375,13 @@ def get_accelerate_model(args, checkpoint_dir):
         tokenizer.add_special_tokens({
                 "eos_token": tokenizer.convert_ids_to_tokens(model.config.eos_token_id),
                 "bos_token": tokenizer.convert_ids_to_tokens(model.config.bos_token_id),
+        })
+        if model.config.pad_token_id is not None and tokenizer.pad_token_id is not None:
+            tokenizer.add_special_tokens({
                 "unk_token": tokenizer.convert_ids_to_tokens(
                     model.config.pad_token_id if model.config.pad_token_id != -1 else tokenizer.pad_token_id
                 ),
-        })
+            })
     
     if not args.full_finetune:
         model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=args.gradient_checkpointing)
