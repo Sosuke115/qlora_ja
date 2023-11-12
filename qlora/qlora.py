@@ -8,7 +8,7 @@ import os
 from os.path import exists, join, isdir
 from dataclasses import dataclass, field
 import sys
-from typing import Optional, Dict, Sequence
+from typing import Optional, Dict, Sequence, List
 import numpy as np
 from tqdm import tqdm
 import logging
@@ -31,7 +31,7 @@ from transformers import (
     LlamaTokenizer
 
 )
-from datasets import load_dataset, Dataset
+from datasets import load_dataset, Dataset, DatasetDict, concatenate_datasets
 import evaluate
 
 from peft import (
@@ -128,6 +128,10 @@ class DataArguments:
     dataset: str = field(
         default='alpaca',
         metadata={"help": "Which dataset to finetune on. See datamodule for options."}
+    )
+    datasets: List[str] = field(
+        default_factory=list,
+        metadata={"help": "List of dataset names"}
     )
     dataset_format: Optional[str] = field(
         default=None,
@@ -651,8 +655,23 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
         return dataset
 
      # Load dataset.
-    dataset = load_data(args.dataset)
-    dataset = format_dataset(dataset, args.dataset_format)
+    if len(args.datasets) == 0:
+        dataset = load_data(args.dataset)
+        dataset = format_dataset(dataset, args.dataset_format)
+    else:
+        # for multiple datasets, concatenate them
+        # TODO: add support for different dataset formats、test datasets
+        datasets = []
+        for dataset_name in args.datasets:
+            dataset = load_data(dataset_name)
+            dataset = format_dataset(dataset, args.dataset_format)
+            assert "input" in dataset.column_names['train'] and "output" in dataset.column_names['train'], \
+                f"Dataset {dataset_name} does not have `input` and `output` columns."
+            datasets.append(dataset)
+        combined_train_dataset = concatenate_datasets([dataset['train'] for dataset in datasets])
+        dataset = DatasetDict({
+            'train': combined_train_dataset,
+        })
 
     # Split train/eval, reduce size
     if args.do_eval or args.do_predict:
