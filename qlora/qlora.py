@@ -221,6 +221,7 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
     save_strategy: str = field(default='steps', metadata={"help": 'When to save checkpoints'})
     save_steps: int = field(default=250, metadata={"help": 'How often to save a model'})
     save_total_limit: int = field(default=40, metadata={"help": 'How many checkpoints to save before the oldest is overwritten'})
+    neftune_noise_alpha: float = field(default=None)
 
 @dataclass
 class GenerationArguments:
