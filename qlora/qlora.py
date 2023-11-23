@@ -596,6 +596,10 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
             return load_dataset("kunishou/databricks-dolly-15k-ja")
         elif dataset_name == 'hh-rlhf-49k-ja':
             return load_dataset("kunishou/hh-rlhf-49k-ja")
+        elif dataset_name == 'oasst1-instruction':
+            return load_dataset("studio-ousia/oasst1-instruction")
+        elif dataset_name == 'oasst1-89k-ja-instruction':
+            return load_dataset("studio-ousia/oasst1-89k-ja-instruction")
         elif dataset_name == 'alpaca-clean':
             return load_dataset("yahma/alpaca-cleaned")
         elif dataset_name == 'chip2':
