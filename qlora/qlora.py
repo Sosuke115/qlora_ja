@@ -599,8 +599,7 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
         elif dataset_name == 'oasst1-instruction':
             return load_dataset("studio-ousia/oasst1-instruction")
         elif dataset_name == 'oasst1-89k-ja-instruction':
-            return load_dataset("parquet", data_files="https://huggingface.co/datasets/studio-ousia/oasst1-89k-ja-instruction/resolve/main/train_full.pq")
-            # return load_dataset("studio-ousia/oasst1-89k-ja-instruction")
+            return load_dataset("studio-ousia/oasst1-89k-ja-instruction")
         elif dataset_name == 'alpaca-clean':
             return load_dataset("yahma/alpaca-cleaned")
         elif dataset_name == 'chip2':
