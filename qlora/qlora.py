@@ -545,11 +545,33 @@ ALPACA_PROMPT_DICT = {
     ),
 }
 
+# 参考: https://www.promptingguide.ai/models/mistral-7b#mistral-7b-instruct
+# FIXME: もっと良いプロンプトあるかも
+MISTRAL_PROMPT_DICT = {
+    "prompt_input": (
+        "[INST] Below is an instruction that describes a task, paired with an input that provides further context. "
+        "Write a response that appropriately completes the request.\n\n"
+        "### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response: [/INST]"
+    ),
+    "prompt_no_input": (
+        "[INST] Below is an instruction that describes a task. "
+        "Write a response that appropriately completes the request.\n\n"
+        "### Instruction:\n{instruction}\n\n### Response: [/INST]"
+    ),
+}
+
 def extract_alpaca_dataset(example):
     if example.get("input", "") != "":
         prompt_format = ALPACA_PROMPT_DICT["prompt_input"]
     else:
         prompt_format = ALPACA_PROMPT_DICT["prompt_no_input"]
+    return {'input': prompt_format.format(**example)}
+
+def extract_mistral_dataset(example):
+    if example.get("input", "") != "":
+        prompt_format = MISTRAL_PROMPT_DICT["prompt_input"]
+    else:
+        prompt_format = MISTRAL_PROMPT_DICT["prompt_no_input"]
     return {'input': prompt_format.format(**example)}
 
 def local_dataset(dataset_name):
@@ -631,6 +653,8 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
             (dataset_format is None and args.dataset in ['alpaca', 'alpaca-clean'])
         ):
             dataset = dataset.map(extract_alpaca_dataset, remove_columns=['instruction'])
+        elif (dataset_format == 'mistral'):
+            dataset = dataset.map(extract_mistral_dataset, remove_columns=['instruction'])
         elif dataset_format == 'chip2' or (dataset_format is None and args.dataset == 'chip2'):
             dataset = dataset.map(lambda x: {
                 'input': x['text'].split('\n<bot>: ')[0].replace('<human>: ', ''),
