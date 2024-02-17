@@ -97,6 +97,11 @@ class ModelArguments:
         default=False,
         metadata={"help": "Enables using Huggingface auth token from Git Credentials."}
     )
+    # Specify the adapter's path separately from the base model path if the adapter is located in a different directory.
+    # Note: trainer_state is not loaded in this case.
+    adapter_path: Optional[str] = field(
+        default=None, metadata={"help": "Path to adapter checkpoint."}
+    )
 
 @dataclass
 class DataArguments:
@@ -200,7 +205,7 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
         metadata={"help":"Lora dropout."}
     )
     max_memory_MB: int = field(
-        default=80000,
+        default=15000,
         metadata={"help": "Free memory per gpu."}
     )
     report_to: str = field(
@@ -774,6 +779,9 @@ def train():
     checkpoint_dir, completed_training = get_last_checkpoint(args.output_dir)
     if completed_training:
         print('Detected that training was already completed!')
+    
+    if checkpoint_dir is None:
+        checkpoint_dir = args.adapter_path
 
     model, tokenizer = get_accelerate_model(args, checkpoint_dir)
 
