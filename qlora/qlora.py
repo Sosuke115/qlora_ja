@@ -400,7 +400,10 @@ def get_accelerate_model(args, checkpoint_dir):
         model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=args.gradient_checkpointing)
 
     if not args.full_finetune:
-        if checkpoint_dir is not None:
+        if args.adapter_path is not None:
+            print("Loading adapters from adapter_path.")
+            model = PeftModel.from_pretrained(model, args.adapter_path, is_trainable=True)
+        elif checkpoint_dir is not None:
             print("Loading adapters from checkpoint.")
             model = PeftModel.from_pretrained(model, join(checkpoint_dir, 'adapter_model'), is_trainable=True)
         else:
@@ -743,9 +746,6 @@ def train():
     checkpoint_dir, completed_training = get_last_checkpoint(args.output_dir)
     if completed_training:
         print('Detected that training was already completed!')
-    
-    if checkpoint_dir is None:
-        checkpoint_dir = args.adapter_path
 
     model, tokenizer = get_accelerate_model(args, checkpoint_dir)
 
