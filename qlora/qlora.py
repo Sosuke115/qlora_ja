@@ -406,6 +406,7 @@ def get_accelerate_model(args, checkpoint_dir):
         else:
             print(f'adding LoRA modules...')
             modules = find_all_linear_names(args, model)
+            print(modules)
             config = LoraConfig(
                 r=args.lora_r,
                 lora_alpha=args.lora_alpha,
@@ -617,48 +618,11 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
 
     """
     def load_data(dataset_name):
-        if dataset_name == 'alpaca':
-            return load_dataset("tatsu-lab/alpaca")
-        elif dataset_name == 'databricks-dolly-15k-ja':
-            return load_dataset("kunishou/databricks-dolly-15k-ja")
-        elif dataset_name == 'hh-rlhf-49k-ja':
-            return load_dataset("kunishou/hh-rlhf-49k-ja")
-        elif dataset_name == 'oasst1-instruction':
-            return load_dataset("studio-ousia/oasst1-instruction")
-        elif dataset_name == 'oasst1-89k-ja-instruction':
-            return load_dataset("studio-ousia/oasst1-89k-ja-instruction")
-        elif dataset_name == 'sharegpt_0_1':
-            return load_dataset("studio-ousia/sharegpt_0_1")
-        elif dataset_name == 'sharegpt_n-1_n':
-            return load_dataset("studio-ousia/sharegpt_n-1_n")
-        elif dataset_name == 'flan_v2_0_1':
-            return load_dataset("studio-ousia/flan_v2_0_1")
-        elif dataset_name == 'flan_v2_n-1_n':
-            return load_dataset("studio-ousia/flan_v2_n-1_n")
-        elif dataset_name == 'alpaca-clean':
-            return load_dataset("yahma/alpaca-cleaned")
-        elif dataset_name == 'chip2':
-            return load_dataset("laion/OIG", data_files='unified_chip2.jsonl')
-        elif dataset_name == 'self-instruct':
-            return load_dataset("yizhongw/self_instruct", name='self_instruct')
-        elif dataset_name == 'hh-rlhf':
-            return load_dataset("Anthropic/hh-rlhf")
-        elif dataset_name == 'longform':
-            return load_dataset("akoksal/LongForm")
-        elif dataset_name == 'oasst1':
-            return load_dataset("timdettmers/openassistant-guanaco")
-        elif dataset_name == 'vicuna':
-            raise NotImplementedError("Vicuna data was not released.")
-        else:
-            if os.path.exists(dataset_name):
-                try:
-                    args.dataset_format = args.dataset_format if args.dataset_format else "input-output"
-                    full_dataset = local_dataset(dataset_name)
-                    return full_dataset
-                except:
-                    raise ValueError(f"Error loading dataset from {dataset_name}")
-            else:
-                raise NotImplementedError(f"Dataset {dataset_name} not implemented yet.")
+        try:
+            dataset = load_dataset(dataset_name)
+        except:
+            raise NotImplementedError(f"Dataset {dataset_name} not implemented yet.")
+        return dataset
 
     def format_dataset(dataset, dataset_format):
         if (
