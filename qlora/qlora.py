@@ -31,7 +31,7 @@ from transformers import (
     LlamaTokenizer
 
 )
-from datasets import load_dataset, Dataset, DatasetDict, concatenate_datasets
+from datasets import load_dataset, Dataset, DatasetDict, concatenate_datasets, interleave_datasets
 import evaluate
 
 from peft import (
@@ -139,7 +139,11 @@ class DataArguments:
         metadata={"help": "List of dataset names"}
     )
     dataset_format: Optional[str] = field(
-        default=None,
+        default="alpaca",
+        metadata={"help": "Which dataset format is used. [alpaca|chip2|self-instruct|hh-rlhf]"}
+    )
+    sampling_probabilities: List[float] = field(
+        default_factory=list,
         metadata={"help": "Which dataset format is used. [alpaca|chip2|self-instruct|hh-rlhf]"}
     )
 
@@ -676,10 +680,21 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
             assert "input" in dataset.column_names['train'] and "output" in dataset.column_names['train'], \
                 f"Dataset {dataset_name} does not have `input` and `output` columns."
             datasets.append(dataset)
-        combined_train_dataset = concatenate_datasets([dataset['train'] for dataset in datasets])
+        if args.sampling_probabilities:
+            assert len(args.sampling_probabilities) == len(datasets)
+            print(args.sampling_probabilities)
+            combined_train_dataset = interleave_datasets(
+                [dataset['train'] for dataset in datasets],
+                probabilities=args.sampling_probabilities,
+                stopping_strategy="all_exhausted",
+                seed=args.seed,
+            )
+        else:
+            combined_train_dataset = concatenate_datasets([dataset['train'] for dataset in datasets])
         dataset = DatasetDict({
             'train': combined_train_dataset,
         })
+        print(dataset)
 
     # Split train/eval, reduce size
     if args.do_eval or args.do_predict:
