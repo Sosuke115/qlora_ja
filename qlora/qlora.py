@@ -1,7 +1,5 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-
-from collections import defaultdict
 import copy
 import json
 import os
@@ -373,7 +371,7 @@ def get_accelerate_model(args, checkpoint_dir):
         cache_dir=args.cache_dir,
         padding_side="right",
         use_fast=args.use_fast_tokenizer, # Fast tokenizer giving issues.
-        tokenizer_type='llama' if 'llama' in args.model_name_or_path else None, # Needed for HF name change
+        # tokenizer_type='llama' if 'llama' in args.model_name_or_path else None, # Needed for HF name change
         trust_remote_code=args.trust_remote_code,
         use_auth_token=args.use_auth_token,
     )
