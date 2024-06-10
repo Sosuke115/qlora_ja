@@ -41,6 +41,8 @@ from peft import (
 from peft.tuners.lora import LoraLayer
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
+from configs import H4ArgumentParser
+
 
 def is_ipex_available():
     def get_major_and_minor_from_version(full_version):
@@ -571,6 +573,21 @@ MISTRAL_PROMPT_DICT = {
     ),
 }
 
+CUSTOM_JA_PROMPT_DICT = {
+    "prompt_input": (
+        "あなたは誠実で優秀な日本人のアシスタントです。"
+        "以下はタスクを説明する指示と、それに関連する文脈を提供する入力です。"
+        "指示に適切に応じた回答を書いてください。\n\n"
+        "### 指示:\n{instruction}\n\n### 入力:\n{input}\n\n### 回答: "
+    ),
+    "prompt_no_input": (
+        "あなたは誠実で優秀な日本人のアシスタントです。"
+        "以下はタスクを説明する指示です。"
+        "指示に適切に応じた回答を書いてください。\n\n"
+        "### 指示:\n{instruction}\n\n### 回答: "
+    ),
+}
+
 def extract_alpaca_dataset(example):
     if example.get("input", "") != "":
         prompt_format = ALPACA_PROMPT_DICT["prompt_input"]
@@ -583,6 +600,13 @@ def extract_mistral_dataset(example):
         prompt_format = MISTRAL_PROMPT_DICT["prompt_input"]
     else:
         prompt_format = MISTRAL_PROMPT_DICT["prompt_no_input"]
+    return {'input': prompt_format.format(**example)}
+
+def extract_custom_ja_dataset(example):
+    if example.get("input", "") != "":
+        prompt_format = CUSTOM_JA_PROMPT_DICT["prompt_input"]
+    else:
+        prompt_format = CUSTOM_JA_PROMPT_DICT["prompt_no_input"]
     return {'input': prompt_format.format(**example)}
 
 def local_dataset(dataset_name):
@@ -637,6 +661,8 @@ def make_data_module(tokenizer: transformers.PreTrainedTokenizer, args) -> Dict:
             dataset = dataset.map(extract_alpaca_dataset, remove_columns=['instruction'])
         elif (dataset_format == 'mistral'):
             dataset = dataset.map(extract_mistral_dataset, remove_columns=['instruction'])
+        elif (dataset_format == 'custom-ja'):
+            dataset = dataset.map(extract_custom_ja_dataset, remove_columns=['instruction'])
         elif dataset_format == 'chip2' or (dataset_format is None and args.dataset == 'chip2'):
             dataset = dataset.map(lambda x: {
                 'input': x['text'].split('\n<bot>: ')[0].replace('<human>: ', ''),
@@ -745,11 +771,11 @@ def get_last_checkpoint(checkpoint_dir):
     return None, False # first training
 
 def train():
-    hfparser = transformers.HfArgumentParser((
+    hfparser = H4ArgumentParser((
         ModelArguments, DataArguments, TrainingArguments, GenerationArguments
     ))
-    model_args, data_args, training_args, generation_args, extra_args = \
-        hfparser.parse_args_into_dataclasses(return_remaining_strings=True)
+    
+    model_args, data_args, training_args, generation_args = hfparser.parse()
     training_args.generation_config = transformers.GenerationConfig(**vars(generation_args))
     args = argparse.Namespace(
         **vars(model_args), **vars(data_args), **vars(training_args)
