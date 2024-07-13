@@ -1,13 +1,12 @@
-# qlora_ja
-日本語データセットでのqlora instruction tuningサンプルコード
+## qlora_ja
+Sample code for qlora instruction tuning on a Japanese dataset
 
-# 準備
+## Setup
 ```bash
 pip install -r qlora/requirements.txt
 ```
 
-# 実行例
-
+## Run Example
 ```bash
 python3 qlora/qlora.py config/sample.yaml
 ```
