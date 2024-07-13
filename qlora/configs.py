@@ -27,11 +27,9 @@ MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
 DataClassType = NewType("DataClassType", Any)
 
-
+# https://github.com/huggingface/alignment-handbook/blob/606d2e954fd17999af40e6fb4f712055ca11b2f0/src/alignment/configs.py#L32
 class H4ArgumentParser(HfArgumentParser):
     def parse_yaml_and_args(self, yaml_arg: str, other_args: Optional[List[str]] = None) -> List[dataclass]:
-        print("Parsing YAML file and command line arguments")
-        print(f"YAML file: {yaml_arg}")
         """
         Parse a YAML file and overwrite the default/loaded values with the values provided to the command line.
 
@@ -89,9 +87,6 @@ class H4ArgumentParser(HfArgumentParser):
         return outputs
 
     def parse(self) -> DataClassType | Tuple[DataClassType]:
-        print("=== sys.argv ===")
-        print(f"length of sys.argv: {len(sys.argv)}")
-        print("=== sys.argv ===")
         if len(sys.argv) == 2 and sys.argv[1].endswith(".yaml"):
             # If we pass only one argument to the script and it's the path to a YAML file,
             # let's parse it to get our arguments.
