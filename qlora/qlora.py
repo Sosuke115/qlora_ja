@@ -41,6 +41,8 @@ from peft import (
 from peft.tuners.lora import LoraLayer
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
+from configs import H4ArgumentParser
+
 
 def is_ipex_available():
     def get_major_and_minor_from_version(full_version):
@@ -745,11 +747,11 @@ def get_last_checkpoint(checkpoint_dir):
     return None, False # first training
 
 def train():
-    hfparser = transformers.HfArgumentParser((
+    hfparser = H4ArgumentParser((
         ModelArguments, DataArguments, TrainingArguments, GenerationArguments
     ))
-    model_args, data_args, training_args, generation_args, extra_args = \
-        hfparser.parse_args_into_dataclasses(return_remaining_strings=True)
+    
+    model_args, data_args, training_args, generation_args = hfparser.parse()
     training_args.generation_config = transformers.GenerationConfig(**vars(generation_args))
     args = argparse.Namespace(
         **vars(model_args), **vars(data_args), **vars(training_args)
